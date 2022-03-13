@@ -2,12 +2,14 @@
 
 source ./cluster.conf
 
-for i in 1 2 3; do
-   gcloud beta -q compute instances delete $CONTROLLER_NAME-${i} --zone=$ZONE
-   gcloud beta -q compute instances delete $WORKER_NAME-${i} --zone=$ZONE
+gcloud -q compute instances delete $BASE_NODE-1 --zone=$ZONE
+gcloud -q compute instances delete $CONTROLLER_NODE-1 --zone=$ZONE
+
+for i in 1 2; do
+   gcloud -q compute instances delete $WORKER_NODE-${i} --zone=$ZONE
 done
 
-gcloud beta -q compute firewall-rules delete \
+gcloud -q compute firewall-rules delete \
   ingress-deny-all \
   egress-deny-all \
   $VPC_NAME-a-i-internal \
@@ -15,6 +17,6 @@ gcloud beta -q compute firewall-rules delete \
   $VPC_NAME-a-i-external \
   $VPC_NAME-a-e-external 
 
- gcloud beta -q compute networks subnets delete $SUBNET_NAME
+ gcloud -q compute networks subnets delete $SUBNET_NAME
 
- gcloud beta -q compute networks delete $VPC_NAME
+ gcloud -q compute networks delete $VPC_NAME
