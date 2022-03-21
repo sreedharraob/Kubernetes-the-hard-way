@@ -25,47 +25,57 @@ gcloud compute firewall-rules create egress-deny-all \
 gcloud beta compute firewall-rules create $VPC_NAME-a-i-internal \
 --project=$PROJECT_ID --network=$VPC_NAME \
 --direction=INGRESS --priority=1000 \
---rules=tcp,udp,icmp --action=ALLOW \
+--rules=all --action=ALLOW \
 --target-tags=$TARGET_TAGS \
 --source-ranges=$SUBNET_CIDR_RANGE
 
 gcloud beta compute firewall-rules create $VPC_NAME-a-e-internal \
 --project=$PROJECT_ID --network=$VPC_NAME \
---direction=EGRESS --priority=1000 \
---rules=tcp,udp,icmp --action=ALLOW \
+--direction=EGRESS --priority=900 \
+--rules=all --action=ALLOW \
 --target-tags=$TARGET_TAGS \
 --destination-ranges=$SUBNET_CIDR_RANGE
 
 gcloud beta compute firewall-rules create $VPC_NAME-a-e-external \
 --project=$PROJECT_ID --network=$VPC_NAME \
---direction=EGRESS --priority=1000 \
---rules=tcp,icmp --action=ALLOW \
+--direction=EGRESS --priority=900 \
+--rules=all --action=ALLOW \
 --target-tags=$TARGET_TAGS \
 --destination-ranges=0.0.0.0/0
+
+# gcloud beta compute firewall-rules create $VPC_NAME-a-i-external \
+# --project=$PROJECT_ID --network=$VPC_NAME \
+# --direction=INGRESS --priority=1000 \
+# --rules=all --action=ALLOW \
+# --target-tags=$BASE_NODE \
+# --source-ranges=$CLUSTER_AUTH_NETWORKS
 
 gcloud beta compute firewall-rules create $VPC_NAME-a-i-external \
 --project=$PROJECT_ID --network=$VPC_NAME \
 --direction=INGRESS --priority=1000 \
---rules=tcp:22,tcp:6443,icmp --action=ALLOW \
---target-tags=$BASE_NODE \
---source-ranges=$CLUSTER_AUTH_NETWORKS
+--rules=all --action=ALLOW \
+--target-tags=$TARGET_TAGS \
+--source-ranges=0.0.0.0/0
 echo "create cluster vpc firewalls"
 
 gcloud beta compute instances create $BASE_NODE-1 --project=$PROJECT_ID --zone=$ZONE \
 --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
 --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
---boot-disk-size=20GB --boot-disk-device-name=$BASE_NODE-1 --tags=$TARGET_TAGS,$BASE_NODE    
+--boot-disk-size=20GB --boot-disk-device-name=$BASE_NODE-1 --tags=$TARGET_TAGS,$BASE_NODE \
+--scopes=https://www.googleapis.com/auth/cloud-platform 
 
 gcloud beta compute instances create $CONTROLLER_NODE-1 --project=$PROJECT_ID --zone=$ZONE \
 --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
 --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
---no-address --boot-disk-size=20GB --boot-disk-device-name=$CONTROLLER_NODE-1 --tags=$TARGET_TAGS,$CONTROLLER_NODE 
+--boot-disk-size=20GB --boot-disk-device-name=$CONTROLLER_NODE-1 --tags=$TARGET_TAGS,$CONTROLLER_NODE \
+--scopes=https://www.googleapis.com/auth/cloud-platform
 
 for i in 1 2; do
     gcloud beta compute instances create $WORKER_NODE-${i} --project=$PROJECT_ID --zone=$ZONE \
     --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
     --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
-    --no-address --boot-disk-size=20GB --boot-disk-device-name=$WORKER_NODE-${i} --tags=$TARGET_TAGS,$WORKER_NODE 
+    --boot-disk-size=20GB --boot-disk-device-name=$WORKER_NODE-${i} --tags=$TARGET_TAGS,$WORKER_NODE \
+    --scopes=https://www.googleapis.com/auth/cloud-platform
 done
 
 echo -e "\n created the cluster resources \n"
