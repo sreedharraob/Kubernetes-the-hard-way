@@ -61,21 +61,21 @@ echo "create cluster vpc firewalls"
 gcloud beta compute instances create $BASE_NODE-1 --project=$PROJECT_ID --zone=$ZONE \
 --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
 --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
---boot-disk-size=20GB --boot-disk-device-name=$BASE_NODE-1 --tags=$TARGET_TAGS,$BASE_NODE \
---scopes=https://www.googleapis.com/auth/cloud-platform 
+--boot-disk-size=100GB --boot-disk-device-name=$BASE_NODE-1 --tags=$TARGET_TAGS,$BASE_NODE \
+--scopes=https://www.googleapis.com/auth/cloud-platform --service-account=$SERVICE_ACCOUNT
 
 gcloud beta compute instances create $CONTROLLER_NODE-1 --project=$PROJECT_ID --zone=$ZONE \
 --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
 --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
---boot-disk-size=20GB --boot-disk-device-name=$CONTROLLER_NODE-1 --tags=$TARGET_TAGS,$CONTROLLER_NODE \
+--boot-disk-size=100GB --boot-disk-device-name=$CONTROLLER_NODE-1 --tags=$TARGET_TAGS,$CONTROLLER_NODE \
 --scopes=https://www.googleapis.com/auth/cloud-platform
 
 for i in 1 2; do
     gcloud beta compute instances create $WORKER_NODE-${i} --project=$PROJECT_ID --zone=$ZONE \
     --machine-type=$MACHINE_TYPE --subnet=$SUBNET_NAME --network-tier=PREMIUM --no-restart-on-failure \
     --scopes=default --preemptible --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
-    --boot-disk-size=20GB --boot-disk-device-name=$WORKER_NODE-${i} --tags=$TARGET_TAGS,$WORKER_NODE \
-    --scopes=https://www.googleapis.com/auth/cloud-platform
+    --boot-disk-size=100GB --boot-disk-device-name=$WORKER_NODE-${i} --tags=$TARGET_TAGS,$WORKER_NODE \
+    --scopes=https://www.googleapis.com/auth/cloud-platform 
 done
 
 echo -e "\n created the cluster resources \n"
